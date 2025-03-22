@@ -22,7 +22,7 @@ advanced analytics, and nearby event suggestions for a seamless and engaging exp
 
 ---
 
-## 🛠️ Installation
+## 🛠️ Installation[Website]
 
 ```bash
 # Clone the repository
@@ -35,7 +35,7 @@ cd repo-name
 npm install
 
 # Run the project
-npm start
+npm run dev
 ```
 
 # Future Advancements

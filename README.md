@@ -6,16 +6,6 @@ and event discoverability. It should ensure data security, support template cust
 
 ---
 
-## 📑 Table of Contents
-- [Project Overview](#ProjectOverview)
-- [Features](#features)
-- [Installation](#installation)
-- [TechStack](#TechStack)
-- [Future Advancements](#FutureAdvancements)
-- [License](#license)
-
----
-
 ## 📖 Project Overview
 
 We develop a comprehensive event management platform with secure organizer and attendee modules. Organizers can create and customize events, track RSVPs, send automated reminders,
@@ -36,7 +26,7 @@ advanced analytics, and nearby event suggestions for a seamless and engaging exp
 
 ```bash
 # Clone the repository
-git clone https://github.com/username/repo-name.git
+git clone https://github.com/username/repo-name.git](https://github.com/SaxenaAmogh/EASE.git
 
 # Navigate to the project directory
 cd repo-name
@@ -55,6 +45,7 @@ npm start
 4) Improve cross-platform compatibility for seamless user experience.
 5) Strengthen security measures to maintain data integrity.
 6) Implement automated feedback collection for continuous improvement.
-
+--
 ## 📜 License
 This project is licensed under the MIT License
+--

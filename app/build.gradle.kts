@@ -47,6 +47,12 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.auth.ktx)
 
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.google.firebase.firestore.ktx)
+    implementation(libs.androidx.activity.compose.v172)
+    implementation(libs.coil.compose)
+    implementation (libs.google.firebase.storage.ktx)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

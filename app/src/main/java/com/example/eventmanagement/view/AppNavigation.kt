@@ -32,5 +32,6 @@ fun AppNavigation(navController: NavHostController) {
             val id = backStackEntry.arguments?.getString("id") ?: "Default"
             RegisterPage(navController, id)
         }
+        composable("dashboard") { UserHackathonPage(navController) }
     }
 }

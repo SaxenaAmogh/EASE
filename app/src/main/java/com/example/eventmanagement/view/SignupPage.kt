@@ -3,6 +3,7 @@ package com.example.eventmanagement.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +19,12 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -36,6 +42,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,6 +103,7 @@ fun SignupPage(navController: NavController) {
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Scaffold(
         content = {
@@ -245,11 +254,19 @@ fun SignupPage(navController: NavController) {
                                     unfocusedContainerColor = Color(0xFFC2C2C2).copy(alpha = 0.2f)
                                 ),
                                 keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
+                                    keyboardType = if (passwordVisible) KeyboardType.Text else KeyboardType.Password,
                                     imeAction = ImeAction.Done
                                 ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
+                                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                trailingIcon = {
+                                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                        Icon(
+                                            imageVector = if (passwordVisible) Icons.Default.Warning else Icons.Default.Done,
+                                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                                        )
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(0.007 * screenHeight))
                         }
@@ -266,7 +283,7 @@ fun SignupPage(navController: NavController) {
                                             popUpTo("signup") { inclusive = true }
                                         }
                                     } else {
-                                        errorMessage = message
+                                        Toast.makeText(navController.context, message ?: "An unknown error occurred", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             },

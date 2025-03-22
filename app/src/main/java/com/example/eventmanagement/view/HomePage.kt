@@ -186,6 +186,10 @@ fun HomePage(navController: NavController) {
 fun DrawerContent(navController: NavController) {
 
     val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    val name = sessionManager.getUserName() ?: "Unknown"
+    val email = sessionManager.getUserEmail() ?: "Unknown"
+    val phone = sessionManager.getUserPhone() ?: "Unknown"
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -219,19 +223,19 @@ fun DrawerContent(navController: NavController) {
             ) {
                 Column {
                     Text(
-                        "Amogh Saxena",
+                        name,
                         fontSize = 20.sp,
                         fontFamily = latoFontFamily
                     )
                     Text(
-                        "amoghsaxena@gmail.com",
+                        email,
                         fontSize = 16.sp,
                         fontFamily = latoFontFamily
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    "View Profile",
+                    phone,
                     fontSize = 18.sp,
                     color = Color(0xFF6298F0),
                     fontFamily = latoFontFamily
@@ -246,7 +250,7 @@ fun DrawerContent(navController: NavController) {
             fontSize = 18.sp,
             fontFamily = latoFontFamily,
             modifier = Modifier.clickable{
-                //navController.navigate("myEvents")
+                navController.navigate("dashboard")
             })
         Spacer(modifier = Modifier.height(8.dp))
         Text(

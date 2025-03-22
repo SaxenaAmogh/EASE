@@ -2,6 +2,7 @@ package com.example.eventmanagement.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,8 +23,13 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -40,10 +46,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,13 +81,16 @@ fun signIn(email: String, password: String, context: Context, onResult: (Boolean
 @Composable
 fun LoginPage(navController: NavController) {
 
+    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
+    var name by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Scaffold(
         content = {
@@ -147,6 +159,66 @@ fun LoginPage(navController: NavController) {
                                 .fillMaxWidth()
                         ){
                             Text(
+                                text = "Name",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 5.dp),
+                                fontSize = 16.sp,
+                                color = Color.Black,
+                                fontFamily = latoFontFamily,
+                                fontWeight = FontWeight.Bold
+                            )
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                placeholder = { Text("abc@xyz.com") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFFe8b225),
+                                    focusedLabelColor = Color(0xFF000000),
+                                    focusedTextColor = Color(0xFF000000),
+                                    unfocusedContainerColor = Color(0xFFC2C2C2).copy(alpha = 0.2f)
+                                ),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Done
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(0.025 * screenHeight))
+                            Text(
+                                text = "Phone",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 5.dp),
+                                fontSize = 16.sp,
+                                color = Color.Black,
+                                fontFamily = latoFontFamily,
+                                fontWeight = FontWeight.Bold
+                            )
+                            OutlinedTextField(
+                                value = phone,
+                                onValueChange = { phone = it },
+                                placeholder = { Text("abc@xyz.com") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFFe8b225),
+                                    focusedLabelColor = Color(0xFF000000),
+                                    focusedTextColor = Color(0xFF000000),
+                                    unfocusedContainerColor = Color(0xFFC2C2C2).copy(alpha = 0.2f)
+                                ),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Done
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(0.025 * screenHeight))
+                            Text(
                                 text = "Email Id",
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -186,6 +258,7 @@ fun LoginPage(navController: NavController) {
                                 fontFamily = latoFontFamily,
                                 fontWeight = FontWeight.Bold
                             )
+
                             OutlinedTextField(
                                 value = password,
                                 onValueChange = { password = it },
@@ -199,11 +272,19 @@ fun LoginPage(navController: NavController) {
                                     unfocusedContainerColor = Color(0xFFC2C2C2).copy(alpha = 0.2f)
                                 ),
                                 keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
+                                    keyboardType = if (passwordVisible) KeyboardType.Text else KeyboardType.Password,
                                     imeAction = ImeAction.Done
                                 ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
+                                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                trailingIcon = {
+                                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                        Icon(
+                                            imageVector = if (passwordVisible) Icons.Default.Warning else Icons.Default.Done,
+                                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                                        )
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(0.007 * screenHeight))
                         }
@@ -220,11 +301,13 @@ fun LoginPage(navController: NavController) {
                             onClick = {
                                 signIn(email, password, navController.context) { success, message ->
                                     if (success) {
-                                        navController.navigate("home"){
+                                        val sessionManager = SessionManager(context)
+                                        sessionManager.saveUserSession(name, email, phone)
+                                        navController.navigate("home") {
                                             popUpTo("login") { inclusive = true }
                                         }
                                     } else {
-                                        errorMessage = message
+                                        Toast.makeText(navController.context, message ?: "Login failed. Please try again.", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             },
@@ -237,38 +320,6 @@ fun LoginPage(navController: NavController) {
                                 fontSize = 20.sp,
                                 fontFamily = latoFontFamily
                             )
-                        }
-                        Spacer(modifier = Modifier.height(0.028 * screenHeight))
-                        FloatingActionButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .border(
-                                    width = 1.5.dp,
-                                    shape = RoundedCornerShape(50),
-                                    color = Color(0xFFC2C2C2).copy(alpha = 0.5f)
-                                )
-                                .clip(shape = RoundedCornerShape(50)),
-                            onClick = {
-//                            navController.navigate("home") {
-//                                popUpTo("login") { inclusive = true }
-//                            }
-                            },
-                            containerColor = Color.White,
-                        ) {
-                            Row {
-                                Image(
-                                    painter = painterResource(id = R.drawable.google),
-                                    contentDescription = "Google",
-                                )
-                                Text(
-                                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-                                    color = Color.Black,
-                                    text = " Sign in with Google",
-                                    fontSize = 20.sp,
-                                    fontFamily = latoFontFamily
-                                )
-                            }
-
                         }
                         Spacer(modifier = Modifier.height(0.01 * screenHeight))
                         Row(

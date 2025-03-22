@@ -62,9 +62,21 @@ import androidx.compose.ui.unit.times
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.eventmanagement.R
 import com.example.eventmanagement.ui.theme.latoFontFamily
 import com.example.eventmanagement.viewmodel.EventViewModel
+
+fun extractDate(dateTime: String): String {
+    return if (dateTime.length >= 8) {
+        val year = dateTime.substring(0, 4)
+        val month = dateTime.substring(4, 6)
+        val day = dateTime.substring(6, 8)
+        "$day-$month-$year"
+    } else {
+        "Invalid Date"
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ViewModelConstructorInComposable")
@@ -165,7 +177,7 @@ fun AttendPage(navController: NavController) {
                                                                 fontSize = 22.sp
                                                             )
                                                             Text(
-                                                                text = events[it].location + " | " + events[it].date,
+                                                                text = events[it].location + " | " + extractDate(events[it].startDate),
                                                                 fontSize = 14.sp
                                                             )
                                                         }
@@ -194,8 +206,8 @@ fun AttendPage(navController: NavController) {
                                                         )
                                                     }
                                                     Column {
-                                                        Image(
-                                                            painter = painterResource(id = R.drawable.img4),
+                                                        AsyncImage(
+                                                            model = events[it].image,
                                                             contentDescription = "image",
                                                             modifier = Modifier
                                                                 .padding(5.dp)
@@ -220,32 +232,6 @@ fun AttendPage(navController: NavController) {
                         containerColor = Color.White,
                         dragHandle = null
                     ) {
-                        val annotatedString = buildAnnotatedString {
-                            withStyle(style = SpanStyle(color = Color.Black, fontWeight = FontWeight.Bold, fontFamily = latoFontFamily, fontSize = 18.sp)){
-                                append(
-                                    text = "Instagram Link: ",
-                                )
-                            }
-                            pushStringAnnotation(tag = "URL", annotation = events[num].instagram)
-                            withStyle(style = SpanStyle(color = Color(0xFF6298F0), fontSize = 18.sp, fontFamily = latoFontFamily, textDecoration = TextDecoration.Underline)) {
-                                append("Instagram Link")
-                            }
-                            pop()
-                        }
-                        val annotatedString2 = buildAnnotatedString {
-                            withStyle(style = SpanStyle(color = Color.Black, fontWeight = FontWeight.Bold, fontFamily = latoFontFamily, fontSize = 18.sp)){
-                                append(
-                                    text = "Location: ",
-                                )
-                            }
-                            Log.e("@@##", "Location: ${events[num].locationLink}")
-                            pushStringAnnotation(tag = "URL", annotation = events[num].locationLink)
-                            withStyle(style = SpanStyle(color = Color(0xFF6298F0), fontSize = 18.sp, fontFamily = latoFontFamily, textDecoration = TextDecoration.Underline)) {
-                                append("Open Map")
-                            }
-                            pop()
-                        }
-
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -256,9 +242,9 @@ fun AttendPage(navController: NavController) {
                                     .fillMaxWidth()
                                     .height(0.3f * screenHeight)  // Adjusted for edge-to-edge
                             ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.img4),
-                                    contentDescription = "",
+                                AsyncImage(
+                                    model = events[num].image,
+                                    contentDescription = "image",
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(0.38 * screenHeight),
@@ -313,7 +299,7 @@ fun AttendPage(navController: NavController) {
                                 )
                                 Spacer(modifier = Modifier.height(20.dp))
                                 Text(
-                                    text = "Dates: " + events[num].date,
+                                    text = "Dates: " + extractDate(events[num].startDate) + " - " + extractDate(events[num].endDate),
                                     color = Color(0xFF000000),
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.W500,
@@ -365,6 +351,28 @@ fun AttendPage(navController: NavController) {
                                         modifier = Modifier.clickable {
                                             val intent = Intent(Intent.ACTION_VIEW,
                                                 events[num].instagram.toUri())
+                                            context.startActivity(intent)
+                                        }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Row{
+                                    Text(
+                                        text = "Add to Calendar: ",
+                                        color = Color(0xFF000000),
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.W500,
+                                    )
+                                    Text(
+                                        text = "Google Calendar",
+                                        color = Color(0xFF6298F0),
+                                        fontSize = 18.sp,
+                                        fontFamily = latoFontFamily,
+                                        fontWeight = FontWeight.W500,
+                                        textDecoration = TextDecoration.Underline,
+                                        modifier = Modifier.clickable {
+                                            val intent = Intent(Intent.ACTION_VIEW,
+                                                events[num].calendar.toUri())
                                             context.startActivity(intent)
                                         }
                                     )

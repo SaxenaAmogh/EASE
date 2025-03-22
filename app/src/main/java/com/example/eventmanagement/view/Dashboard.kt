@@ -8,14 +8,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.eventmanagement.repository.SessionManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun UserHackathonPage(navController: NavController) {
-    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val userId = sessionManager.getUserEmail()
     val db = FirebaseFirestore.getInstance()
 
     var registeredEvents by remember { mutableStateOf<List<String>>(emptyList()) }

@@ -1,7 +1,9 @@
 package com.example.eventmanagement.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,28 +42,46 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.eventmanagement.repository.SessionManager
 import com.example.eventmanagement.ui.theme.latoFontFamily
 import com.google.firebase.firestore.FirebaseFirestore
 
-fun addAttendeeToEvent(db: FirebaseFirestore, eventId: String, name: String, email: String, phone: String) {
-    val attendeeData = hashMapOf(
-        "name" to name,
-        "email" to email,
-        "phone" to phone
-    )
+//fun addAttendeeToEvent(db: FirebaseFirestore, eventId: String, name: String, email: String, phone: String) {
+//    val attendeeData = hashMapOf(
+//        "name" to name,
+//        "email" to email,
+//        "phone" to phone
+//    )
+//
+//    // Generate a unique attendee ID
+//    val attendeeRef = db.collection("attendees").document(eventId).collection("attendeesList").document()
+//
+//    attendeeRef.set(attendeeData)
+//        .addOnSuccessListener {
+//            Log.d("Firestore", "Attendee added under event: $eventId with ID: ${attendeeRef.id}")
+//        }
+//        .addOnFailureListener { e ->
+//            Log.e("Firestore", "Error adding attendee", e)
+//        }
+//}
 
-    // Generate a unique attendee ID
-    val attendeeRef = db.collection("attendees").document(eventId).collection("attendeesList").document()
+fun registerUserForEvent(
+    db: FirebaseFirestore,
+    context: Context,
+    userEmail: String,
+    eventId: String
+) {
+    val userId = userEmail.replace(".", "_") // 🔥 Replace '.' to avoid Firestore key issues
 
-    attendeeRef.set(attendeeData)
+    db.collection("users").document(userId)
+        .update("registeredEvents.$eventId", true) // 🔥 Adds event ID under registeredEvents
         .addOnSuccessListener {
-            Log.d("Firestore", "Attendee added under event: $eventId with ID: ${attendeeRef.id}")
+            Toast.makeText(context, "Registered for event successfully!", Toast.LENGTH_SHORT).show()
         }
         .addOnFailureListener { e ->
-            Log.e("Firestore", "Error adding attendee", e)
+            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
 }
-
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -73,6 +94,11 @@ fun RegisterPage(navController: NavController, id: String) {
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    name = sessionManager.getUserName() ?: "Unknown"
+    email = sessionManager.getUserEmail() ?: "Unknown"
+    phone = sessionManager.getUserPhone() ?: "Unknown"
 
     Scaffold(
         content = {
@@ -186,7 +212,8 @@ fun RegisterPage(navController: NavController, id: String) {
                             .fillMaxWidth()
                             .clip(shape = RoundedCornerShape(50)),
                         onClick = {
-                            addAttendeeToEvent(db, id, name, email, phone)
+//                            addAttendeeToEvent(db, id, name, email, phone)
+                            registerUserForEvent(db, context, email, id)
                             navController.navigate("home"){
                                 popUpTo("home") {
                                     inclusive = true}

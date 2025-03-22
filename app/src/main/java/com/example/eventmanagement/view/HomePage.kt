@@ -262,14 +262,6 @@ fun DrawerContent(navController: NavController) {
             })
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "My Events",
-            fontSize = 18.sp,
-            fontFamily = latoFontFamily,
-            modifier = Modifier.clickable{
-                //navController.navigate("myEvents")
-            })
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
             "Settings",
             fontSize = 18.sp,
             fontFamily = latoFontFamily,

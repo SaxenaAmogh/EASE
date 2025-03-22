@@ -1,9 +1,7 @@
 package com.example.eventmanagement.view
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,7 +53,9 @@ import com.example.eventmanagement.repository.SessionManager
 import com.example.eventmanagement.ui.theme.latoFontFamily
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 
 fun signUp(email: String, password: String, context: Context, onResult: (Boolean, String?) -> Unit) {
@@ -70,24 +70,36 @@ fun signUp(email: String, password: String, context: Context, onResult: (Boolean
         }
 }
 
-fun addUser(
+fun storeUserDetails(
     db: FirebaseFirestore,
-    name: String,
+    context: Context,
     email: String,
+    name: String,
+    phone: String,
+    onSuccess: () -> Unit,
+    onFailure: (String) -> Unit
 ) {
-    val userRef = db.collection("users").document()
+    val userId = email.replace(".", "_") // 🔥 Replace '.' to avoid Firestore key issues
 
     val userData = hashMapOf(
         "name" to name,
         "email" to email,
+        "phone" to phone
     )
 
-    userRef.set(userData, SetOptions.merge()) // Merge to prevent overwriting existing data
+    // 🔥 Store user details in Firestore
+    db.collection("users").document(userId)
+        .set(userData)
         .addOnSuccessListener {
-            Log.d("Firestore", "User added/updated:")
+            // 🔥 Save user details in SharedPreferences
+            val sessionManager = SessionManager(context)
+            sessionManager.saveUserSession(name, email, phone)
+
+            Toast.makeText(context, "User details stored successfully!", Toast.LENGTH_SHORT).show()
+            onSuccess()
         }
         .addOnFailureListener { e ->
-            Log.e("Firestore", "Error adding user", e)
+            onFailure("Error storing user data: ${e.message}")
         }
 }
 
@@ -96,11 +108,13 @@ fun addUser(
 @Composable
 fun SignupPage(navController: NavController) {
 
+    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
     var email by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -202,6 +216,36 @@ fun SignupPage(navController: NavController) {
                             )
                             Spacer(modifier = Modifier.height(0.025 * screenHeight))
                             Text(
+                                text = "Phone Num",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 5.dp),
+                                fontSize = 16.sp,
+                                color = Color.Black,
+                                fontFamily = latoFontFamily,
+                                fontWeight = FontWeight.Bold
+                            )
+                            OutlinedTextField(
+                                value = phone,
+                                onValueChange = { phone = it },
+                                placeholder = { Text("") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFFe8b225),
+                                    focusedLabelColor = Color(0xFF000000),
+                                    focusedTextColor = Color(0xFF000000),
+                                    unfocusedContainerColor = Color(0xFFC2C2C2).copy(alpha = 0.2f)
+                                ),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Done
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(0.025 * screenHeight))
+                            Text(
                                 text = "Email Id",
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -278,7 +322,13 @@ fun SignupPage(navController: NavController) {
                             onClick = {
                                 signUp(email, password, navController.context) { success, message ->
                                     if (success) {
-                                        addUser(FirebaseFirestore.getInstance(), name, email)
+                                        val sessionManager = SessionManager(context)
+                                        sessionManager.saveUserSession(name, email, phone)
+                                        storeUserDetails(FirebaseFirestore.getInstance(), context, email, name, phone, onSuccess = {
+                                            Toast.makeText(context, "User details stored successfully!", Toast.LENGTH_SHORT).show()
+                                        }, onFailure = {
+                                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                        })
                                         navController.navigate("home") {
                                             popUpTo("signup") { inclusive = true }
                                         }

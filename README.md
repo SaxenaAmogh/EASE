@@ -11,6 +11,7 @@ and event discoverability. It should ensure data security, support template cust
 - [Features](#features)
 - [Installation](#installation)
 - [TechStack](#TechStack)
+- [Future Advancements](#FutureAdvancements)
 - [License](#license)
 
 ---
@@ -45,3 +46,15 @@ npm install
 
 # Run the project
 npm start
+```
+
+# Future Advancements
+1) Integrate AI for personalized event recommendations.
+2) Enhance advanced analytics for deeper engagement insights.
+3) Support hybrid and virtual events for broader accessibility.
+4) Improve cross-platform compatibility for seamless user experience.
+5) Strengthen security measures to maintain data integrity.
+6) Implement automated feedback collection for continuous improvement.
+
+## 📜 License
+This project is licensed under the MIT License
